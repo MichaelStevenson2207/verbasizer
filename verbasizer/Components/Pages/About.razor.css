@@ -1,0 +1,111 @@
+.about-shell {
+    display: grid;
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+    color: #201a25;
+}
+
+.about-hero,
+.about-card,
+.sources-card {
+    position: relative;
+    padding: 1.75rem;
+    border-radius: 1.25rem;
+    border: 1px solid rgba(160, 33, 84, 0.14);
+    background: rgba(255, 251, 252, 0.92);
+    box-shadow: 0 24px 50px rgba(58, 12, 38, 0.1);
+    backdrop-filter: blur(8px);
+}
+
+.about-hero {
+    overflow: hidden;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.93) 0%, rgba(255, 243, 246, 0.94) 58%, rgba(237, 247, 255, 0.9) 100%);
+}
+
+.about-hero::after {
+    content: "";
+    position: absolute;
+    top: -1rem;
+    right: 2rem;
+    width: 7rem;
+    height: 14rem;
+    opacity: 0.18;
+    transform: rotate(16deg);
+    background: linear-gradient(180deg, #ef3c58 0%, #0d71d4 100%);
+    clip-path: polygon(46% 0, 78% 0, 55% 40%, 84% 40%, 24% 100%, 40% 58%, 15% 58%);
+    pointer-events: none;
+}
+
+.eyebrow {
+    margin: 0 0 0.75rem;
+    color: #bc184d;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.about-hero h1 {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.02;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    max-width: 14ch;
+}
+
+.about-lede {
+    max-width: 60rem;
+    margin: 0;
+    color: #4e3c4f;
+    font-size: 1.06rem;
+    line-height: 1.75;
+}
+
+.about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.about-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.about-card h2,
+.sources-card h2 {
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.about-card p:last-child,
+.sources-card ul {
+    margin-bottom: 0;
+}
+
+.about-card p,
+.sources-card li {
+    color: #4e3c4f;
+    line-height: 1.7;
+}
+
+.sources-card ul {
+    padding-left: 1.2rem;
+}
+
+.sources-card a {
+    color: #0d71d4;
+    font-weight: 600;
+}
+
+@media (max-width: 640px) {
+    .about-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

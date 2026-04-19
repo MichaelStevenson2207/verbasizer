@@ -1,7 +1,171 @@
 ﻿@page "/"
+@rendermode InteractiveServer
+@using verbasizer.Services
+@inject VerbasizerComposer Composer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>verbasizer</PageTitle>
 
-<h1>Hello, world!</h1>
+<div class="home-shell">
+    <section class="hero-panel">
+        <div class="glam-bolt" aria-hidden="true">
+            <span class="bolt-shadow"></span>
+            <span class="bolt-red"></span>
+            <span class="bolt-blue"></span>
+        </div>
 
-Welcome to your new app.
+        <div class="hero-copy">
+            <p class="eyebrow">Bowie-style cut-up studio</p>
+            <h1>Verbaszier</h1>
+            <p class="lede">
+                Paste in fragments from anywhere, click <strong>Verbasize</strong>, and the app remixes the shared language
+                into lyric-shaped lines that still respect punctuation and sentence flow.
+            </p>
+        </div>
+
+        <div class="hero-card">
+            <h2>How it works</h2>
+            <ul>
+                <li>Combine as many source texts as you want.</li>
+                <li>Build a shared word-and-punctuation chain from the source material.</li>
+                <li>Generate new lines that stay readable while still feeling cut-up and unpredictable.</li>
+            </ul>
+            <a class="health-link" href="health" target="_blank" rel="noreferrer">View health check JSON</a>
+        </div>
+    </section>
+
+    <section class="workspace-panel">
+        <div class="workspace-header">
+            <div>
+                <h2>Text sources</h2>
+                <p>Add passages, lyrics, prose, interview fragments, or your own notes. Each click reshuffles the same corpus into a fresh draft.</p>
+            </div>
+
+            <div class="toolbar">
+                <label class="line-count">
+                    <span>Lines</span>
+                    <input type="number" min="2" max="12" @bind="RequestedLineCount" />
+                </label>
+                <button type="button" class="btn btn-outline-secondary" @onclick="AddSource">Add source</button>
+                <button type="button" class="btn btn-primary" @onclick="Verbasize">Verbasize</button>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(ErrorMessage))
+        {
+            <div class="alert alert-warning" role="alert">@ErrorMessage</div>
+        }
+
+        <div class="sources-grid">
+            @for (var index = 0; index < Sources.Count; index++)
+            {
+                var source = Sources[index];
+
+                <section class="source-card">
+                    <div class="source-card-header">
+                        <h3>Source @(index + 1)</h3>
+                        <button type="button"
+                                class="btn btn-sm btn-outline-secondary"
+                                @onclick="() => RemoveSource(source.Id)"
+                                disabled="@(Sources.Count == 1)">
+                            Remove
+                        </button>
+                    </div>
+
+                    <textarea @bind="source.Content"
+                              @bind:event="oninput"
+                              rows="10"
+                              placeholder="Paste text here. The more varied the material, the stranger the lyric draft becomes."></textarea>
+                </section>
+            }
+        </div>
+    </section>
+
+    <section class="output-panel">
+        <div class="output-header">
+            <div>
+                <h2>Generated lyrics</h2>
+                <p>
+                    @if (LastComposition is null)
+                    {
+                        <span>Nothing generated yet.</span>
+                    }
+                    else
+                    {
+                        <span>Built from @LastComposition.SourceCount source(s) with a @LastComposition.DistinctWordCount-word vocabulary.</span>
+                    }
+                </p>
+            </div>
+
+            <button type="button" class="btn btn-outline-light" @onclick="ClearOutput" disabled="@string.IsNullOrWhiteSpace(GeneratedLyrics)">Clear</button>
+        </div>
+
+        @if (string.IsNullOrWhiteSpace(GeneratedLyrics))
+        {
+            <div class="output-placeholder">
+                Click <strong>Verbasize</strong> to generate a punctuation-aware lyric sketch from your source texts.
+            </div>
+        }
+        else
+        {
+            <pre class="lyrics-output">@GeneratedLyrics</pre>
+        }
+    </section>
+</div>
+
+@code {
+    private readonly List<TextSourceInput> Sources = [new(), new()];
+    private string? GeneratedLyrics;
+    private string? ErrorMessage;
+    private int RequestedLineCount = 6;
+    private VerbasizerComposition? LastComposition;
+
+    private void AddSource()
+    {
+        Sources.Add(new TextSourceInput());
+    }
+
+    private void RemoveSource(Guid sourceId)
+    {
+        var source = Sources.FirstOrDefault(item => item.Id == sourceId);
+
+        if (source is null || Sources.Count == 1)
+        {
+            return;
+        }
+
+        Sources.Remove(source);
+    }
+
+    private void Verbasize()
+    {
+        RequestedLineCount = Math.Clamp(RequestedLineCount, 2, 12);
+
+        var composition = Composer.Compose(Sources.Select(source => source.Content).ToList(), RequestedLineCount);
+
+        if (string.IsNullOrWhiteSpace(composition.Lyrics))
+        {
+            ErrorMessage = "Add enough source text to build a lyric draft.";
+            GeneratedLyrics = null;
+            LastComposition = null;
+            return;
+        }
+
+        ErrorMessage = null;
+        GeneratedLyrics = composition.Lyrics;
+        LastComposition = composition;
+    }
+
+    private void ClearOutput()
+    {
+        GeneratedLyrics = null;
+        ErrorMessage = null;
+        LastComposition = null;
+    }
+
+    private sealed class TextSourceInput
+    {
+        public Guid Id { get; } = Guid.NewGuid();
+
+        public string Content { get; set; } = string.Empty;
+    }
+}
